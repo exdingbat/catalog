@@ -91,7 +91,5 @@ const [nestedCardData, byTheme, flatCardData] = flatData.reduce(
 );
 
 export default Object.values(byTheme);
-console.log("byTheme", Object.values(byTheme));
 export { nestedCardData };
 export { flatCardData };
-console.log({ nestedCardData, flatCardData, byTheme });

@@ -130,7 +130,7 @@ function initializeIntersectionObserver() {
     {
       rootMargin: "200px",
       threshold: 0.1,
-    },
+    }
   );
 }
 
@@ -145,7 +145,7 @@ const getListItemData = (rows) => {
   }
 
   const result = rows.sort((a, b) =>
-    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year,
+    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year
   );
 
   DATA_CACHE.set(cacheKey, result);
@@ -157,9 +157,6 @@ function makeListItems(items) {
   if (!items.length) return null;
 
   const listData = getListItemData(items);
-  if (items.title === "Time Cruisers") {
-    console.log("listData", listData);
-  }
   const h2 = document.createElement("h2");
   h2.append(items.title);
 
@@ -180,10 +177,10 @@ function makeListItems(items) {
     try {
       const searchResults = performSearchWithFlatData(INITIAL_QUERY);
       const resultSetNumbers = new Set(
-        searchResults.map((r) => `${r.itemnumber}`),
+        searchResults.map((r) => `${r.itemnumber}`)
       );
       filteredData = filteredData.filter((item) =>
-        resultSetNumbers.has(item.itemnumber),
+        resultSetNumbers.has(item.itemnumber)
       );
     } catch (error) {
       console.error("Error pre-filtering data:", error);
@@ -195,9 +192,6 @@ function makeListItems(items) {
   // Create placeholders only for filtered data
   filteredData.forEach((itemData) => {
     const placeholder = createPlaceholder(itemData);
-    if (items.title === "Time Cruisers") {
-      console.log("placeholder", placeholder._cardData);
-    }
     intersectionObserver.observe(placeholder);
     listItems.push(placeholder);
   });
@@ -272,7 +266,7 @@ function updateSearchSuggestions(inputValue = "") {
   }
   if (trimmed.startsWith("subtheme:")) {
     for (const subtheme of new Set(
-      [...THEMES.values()].map((x) => [...x]).flat(),
+      [...THEMES.values()].map((x) => [...x]).flat()
     )) {
       const opt = document.createElement("option");
       opt.value = `subtheme:${subtheme}`;
@@ -321,11 +315,13 @@ if (INITIAL_QUERY) {
   const results = performSearchWithFlatData(INITIAL_QUERY);
   CURRENT_SEARCH_STATE.isActive = true;
   CURRENT_SEARCH_STATE.resultSetNumbers = new Set(
-    results.map((r) => `${r.itemnumber}`),
+    results.map((r) => `${r.itemnumber}`)
   );
 
   if (INITIAL_QUERY && results.length > 0) {
-    RESULT_COUNT.textContent = `Found ${results.length} result${results.length === 1 ? "" : "s"} for "${INITIAL_QUERY}"`;
+    RESULT_COUNT.textContent = `Found ${results.length} result${
+      results.length === 1 ? "" : "s"
+    } for "${INITIAL_QUERY}"`;
     SEARCH_RESULTS.style.display = "flex";
   } else if (INITIAL_QUERY && results.length === 0) {
     RESULT_COUNT.textContent = `No results found for "${INITIAL_QUERY}"`;

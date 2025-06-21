@@ -131,12 +131,10 @@ export function performSearchWithFlatData(query) {
   }
 
   const results = flatCardData.filter((item) => evaluateAST(ast, item));
-  console.log("query", query, results);
   return results;
 }
 
 export function performSearch(query) {
-  console.log("performSearch", query);
   try {
     SEARCH.classList.add("search-loading");
 
@@ -152,7 +150,6 @@ export function performSearch(query) {
 
       // Show all items
       let visibleCount = 0;
-      console.log("CATALOG_DATA", CATALOG_DATA);
       CATALOG_DATA.forEach((catalogEntry, itemNumber) => {
         if (catalogEntry.element) {
           catalogEntry.element.hidden = false;
@@ -185,7 +182,7 @@ export function performSearch(query) {
 function applySearchResults(currentSearchResults) {
   const resultSetNumbers = new Set(
     // currentSearchResults.map((r) => `${r.Number}-${r.Variant}`),
-    currentSearchResults.map((r) => `${r.itemnumber}`),
+    currentSearchResults.map((r) => `${r.itemnumber}`)
   );
 
   CURRENT_SEARCH_STATE.isActive = true;
@@ -212,7 +209,9 @@ function applySearchResults(currentSearchResults) {
 
 function updateSearchResultsDisplay(query, total) {
   if (query && total > 0) {
-    RESULT_COUNT.textContent = `Found ${total} result${total === 1 ? "" : "s"} for "${query}"`;
+    RESULT_COUNT.textContent = `Found ${total} result${
+      total === 1 ? "" : "s"
+    } for "${query}"`;
     SEARCH_RESULTS.style.display = "flex";
   } else if (query && total === 0) {
     RESULT_COUNT.textContent = `No results found for "${query}"`;
