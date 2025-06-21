@@ -1,4 +1,5 @@
-import flatData from "./flat.json" with { type: "json" };
+// import flatData from "./flat.json" with { type: "json" };
+import loadTuples from "./tuples.mjs";
 import { getOmitList } from "./omitManager.mjs";
 import {
   getDate,
@@ -12,7 +13,7 @@ const NOW = new Date();
 export const THEMES = new Map();
 
 function flatDataToCatalogCardData(x) {
-  const retiredDate = getDate(x.ExitDate || x.USDateRemoved);
+  const retiredDate = new Date(x.ExitDate || x.USDateRemoved);
   const retired =
     retiredDate === null ||
     (retiredDate < NOW && retiredDate.getFullYear() !== 2025);
@@ -21,8 +22,7 @@ function flatDataToCatalogCardData(x) {
     month: "numeric",
     day: "numeric",
   });
-  const id = x.Number;
-  const v = x.Variant;
+  const id = x.ItemNumber;
   return {
     theme: x.Theme,
     subtheme: x.Subtheme,
@@ -32,26 +32,26 @@ function flatDataToCatalogCardData(x) {
     ["aspect-ratio"]: x.dimensions?.aspectRatio,
     name: x.SetName || "",
     year: x.YearFrom,
-    itemnumber: `${x.Number}-${x.Variant}`,
-    variant: x.Variant,
+    itemnumber: x.ItemNumber,
     category: [x.Theme.toUpperCase(), x.Subtheme].filter(Boolean).join(" "),
     price: retired
       ? x.BrickLinkSoldPriceUsed.replace(/(?<=\d)00/, "")
       : x.USRetailPrice,
-    img: x.ImageFilename ? getImg(id, v) : "",
+    img: x.ImageFilename ? getImg(id) : "",
     links: {
-      lego: getLego(id, v),
-      brickset: getBrickset(id, v),
-      brinklink: getBricklink(id, v),
+      lego: getLego(id),
+      brickset: getBrickset(id),
+      brinklink: getBricklink(id),
     },
   };
 }
 
 // Function to process data with current omit list
-function processDataWithOmitList() {
+async function processDataWithOmitList() {
   const OMIT = getOmitList();
 
-  return flatData.reduce(
+  const tuples = await loadTuples();
+  return tuples.reduce(
     (acc, x) => {
       if (!x || !x.ThemeGroup) return acc;
       else if (
@@ -97,16 +97,16 @@ function processDataWithOmitList() {
 
       return acc;
     },
-    [{}, {}, []],
+    [{}, {}, []]
   );
 }
 
 // Initial data processing
-let [nestedCardData, byTheme, flatCardData] = processDataWithOmitList();
+let [nestedCardData, byTheme, flatCardData] = await processDataWithOmitList();
 
 // Function to refresh data (for when omit list changes)
-export function refreshData() {
-  [nestedCardData, byTheme, flatCardData] = processDataWithOmitList();
+export async function refreshData() {
+  [nestedCardData, byTheme, flatCardData] = await processDataWithOmitList();
   return Object.values(byTheme);
 }
 

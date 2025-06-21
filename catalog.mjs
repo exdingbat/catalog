@@ -72,10 +72,8 @@ window.refreshCatalogData = function () {
   DATA_CACHE.clear();
 
   // Refresh data
-  const newData = refreshData();
-
   // Re-render catalog
-  renderLists(newData);
+  refreshData().then(renderLists);
 };
 
 // Calculate placeholder height based on aspect ratio

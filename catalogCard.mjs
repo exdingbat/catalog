@@ -25,9 +25,15 @@ export function createCatalogCard(data) {
           <div>${data.note || ""}
           <span class="retired text-outline">retired</span> </div>
           <div class="links">
-          <a class="legoLink" href="${data.links?.lego || "#"}" target="_blank">Lego</a>
-          <a class="bricksetLink" href="${data.links?.brickset || "#"}" target="_blank">Brickset</a>
-          <a class="bricklinkLink" href="${data.links?.bricklink || "#"}" target="_blank">Bricklink</a>
+          <a class="legoLink" href="${
+            data.links?.lego || "#"
+          }" target="_blank">Lego</a>
+          <a class="bricksetLink" href="${
+            data.links?.brickset || "#"
+          }" target="_blank">Brickset</a>
+          <a class="bricklinkLink" href="${
+            data.links?.bricklink || "#"
+          }" target="_blank">Bricklink</a>
           </div>
       </div>
     `;
@@ -52,7 +58,7 @@ export function createCatalogCard(data) {
           DIALOG.showModal();
         }
       },
-      { passive: true },
+      { passive: true }
     );
   }
   // Set aspect ratio if provided
