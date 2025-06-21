@@ -30,4 +30,5 @@ export default [
   ["Icons", "Vehicles"],
   ["Promotional"],
   ["Sports"],
+  [, "Fantasy Era"],
 ];

@@ -21,9 +21,25 @@ body {
 }
 
 .search-container > form {
-  max-width: fit-content;
+  max-width: min(100vw, 800px);
   width: 100%;
-  min-width: 300px;
+  min-width: 400px;
+}
+h2 > button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
 }
 .search-container {
   padding: 1rem;
@@ -31,6 +47,7 @@ body {
   border-bottom: 1px solid #dee2e6;
   position: sticky;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: start;
   gap: 10px;
@@ -42,6 +59,7 @@ body {
   /* Enable hardware acceleration */
   transform: translateZ(0);
   will-change: transform;
+  max-width: 100vw;
 }
 
 .search-input-wrapper {
@@ -379,5 +397,223 @@ dialog img {
   }
   100% {
     transform: rotate(360deg);
+  }
+}
+
+/* =====================
+   Omit List Management
+   ===================== */
+.omit-list-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.omit-list-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.omit-list-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 15px;
+}
+
+.omit-list-container {
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  width: max(calc(100vw - 30px), 100%);
+  max-width: 800px;
+  max-height: 70vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.omit-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.omit-list-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.omit-add-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  color: #333;
+}
+
+.omit-add-btn:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.omit-list-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+.omit-list-empty {
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9rem;
+  padding: 20px 0;
+}
+
+.omit-rule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  background: #f8f9fa;
+}
+
+.omit-rule-fields {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.omit-rule-fields input {
+  flex: 1;
+  min-width: 80px;
+  padding: 4px 6px;
+  border: 1px solid #ced4da;
+  border-radius: 3px;
+  font-size: 12px;
+  transition: border-color 0.2s ease;
+}
+
+.omit-rule-fields input:focus {
+  outline: none;
+  border-color: #007bff;
+
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.omit-remove-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+  color: #dc3545;
+  flex-shrink: 0;
+}
+
+.omit-remove-btn:hover {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.omit-list-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid #dee2e6;
+  background: #f8f9fa;
+  justify-content: flex-end;
+}
+
+.omit-reset-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  color: #6c757d;
+}
+
+.omit-reset-btn:hover {
+  background-color: rgba(108, 117, 125, 0.1);
+}
+
+.omit-close-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 3px;
+  transition: background-color 0.2s ease;
+  color: #007bff;
+}
+
+.omit-close-btn:hover {
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+/* Responsive design for omit list */
+@media (max-width: 768px) {
+  .omit-list-dialog {
+    padding: 10px;
+  }
+
+  .omit-list-container {
+    max-height: 85vh;
+  }
+
+  .omit-rule-fields {
+    /* flex-direction: column; */
+  }
+
+  .omit-rule-fields input {
+    min-width: auto;
+  }
+
+  .omit-list-footer {
+    flex-direction: column;
+  }
+
+  .omit-list-footer button {
+    width: 100%;
   }
 }

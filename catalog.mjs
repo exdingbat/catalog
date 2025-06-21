@@ -1,7 +1,9 @@
 import { performSearch } from "./search.mjs";
-import data, { THEMES } from "./data.mjs";
+import data, { THEMES, refreshData } from "./data.mjs";
 import { CATALOG_DATA } from "./catalogData.mjs";
 import { createCatalogCard } from "./catalogCard.mjs";
+import { toggleOmitListDialog } from "./omitManager.mjs";
+
 const INITIAL_COLLAPSED = "true";
 const DIALOG = document.querySelector("dialog");
 const DIALOG_BUTTON = document.querySelector("dialog button");
@@ -9,8 +11,10 @@ const MAIN = document.getElementById("main");
 const SEARCH_FORM = document.getElementById("searchForm");
 const SEARCH = document.getElementById("search");
 const INITIAL_QUERY = new URLSearchParams(window.location.search).get("q");
+
 // Cache for DOM elements and data
 const DATA_CACHE = new Map();
+
 // --- Dynamic search suggestions for themes and subthemes ---
 const SEARCH_SUGGESTIONS = document.getElementById("searchSuggestions");
 const STATIC_OPTIONS = [
@@ -47,6 +51,32 @@ SEARCH_FORM.addEventListener("submit", (e) => {
     }, 50);
   }
 });
+
+// Add omit list management button to search container
+function addOmitListButton() {
+  const searchContainer = document.querySelector(".search-container");
+  const omitButton = document.createElement("button");
+  omitButton.type = "button";
+  omitButton.className = "omit-list-btn";
+  omitButton.title = "Manage filter rules";
+  omitButton.innerHTML = "⚙️";
+  omitButton.addEventListener("click", toggleOmitListDialog);
+
+  // Insert after the search form
+  searchContainer.insertBefore(omitButton, searchContainer.children[1]);
+}
+
+// Function to refresh catalog data (exposed globally)
+window.refreshCatalogData = function () {
+  // Clear cache
+  DATA_CACHE.clear();
+
+  // Refresh data
+  const newData = refreshData();
+
+  // Re-render catalog
+  renderLists(newData);
+};
 
 // Calculate placeholder height based on aspect ratio
 function calculatePlaceholderHeight(aspectRatio) {
@@ -153,8 +183,15 @@ function makeListItems(items) {
   const listData = getListItemData(items);
 
   const h2 = document.createElement("h2");
-  h2.append(items.title);
+  const button = document.createElement("button");
+  // Add click handler for collapsible functionality
+  button.addEventListener("click", () => {
+    const isCollapsed = h2.getAttribute("data-collapsed") === "true";
+    h2.setAttribute("data-collapsed", !isCollapsed);
+  });
 
+  button.append(items.title);
+  h2.append(button);
   // Add collapsible functionality to the heading
   h2.setAttribute("data-collapsed", INITIAL_COLLAPSED);
 
@@ -186,23 +223,17 @@ function makeList({ title, listItems }) {
   const colCount = Math.max(2, Math.floor(window.innerWidth / 235));
   list.style.setProperty(`--col`, colCount);
 
-  // Add click handler for collapsible functionality
-  title.addEventListener("click", () => {
-    const isCollapsed = title.getAttribute("data-collapsed") === "true";
-    title.setAttribute("data-collapsed", !isCollapsed);
-  });
-
   // Use append instead of spread for better performance
   list.append(...listItems);
   return [title, list];
 }
 
-function renderLists() {
+function renderLists(catalogData = data) {
   MAIN.innerHTML = "";
   const fragment = document.createDocumentFragment();
 
   // Process all lists asynchronously
-  for (const listData of data) {
+  for (const listData of catalogData) {
     const listItems = makeListItems(listData);
     if (listItems) {
       const [title, list] = makeList(listItems);
@@ -288,8 +319,11 @@ if (INITIAL_QUERY) {
   SEARCH.value = INITIAL_QUERY;
 }
 
+// Initialize omit list button
+addOmitListButton();
+
 // Render all lists first (all placeholders will be created)
-renderLists();
+renderLists(data);
 
 // Apply initial search after rendering all placeholders
 if (INITIAL_QUERY) {

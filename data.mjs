@@ -1,5 +1,5 @@
 import flatData from "./flat.json" with { type: "json" };
-import OMIT from "./omit.mjs";
+import { getOmitList } from "./omitManager.mjs";
 import {
   getDate,
   getImg,
@@ -46,54 +46,69 @@ function flatDataToCatalogCardData(x) {
     },
   };
 }
-const [nestedCardData, byTheme, flatCardData] = flatData.reduce(
-  (acc, x) => {
-    if (!x || !x.ThemeGroup) return acc;
-    else if (
-      OMIT.some(([theme, subtheme, name]) => {
-        const hasValue =
-          typeof theme === "string" ||
-          typeof subtheme === "string" ||
-          typeof name === "string";
-        return (
-          hasValue &&
-          (typeof theme === "string" ? x.Theme === theme : true) &&
-          (typeof subtheme === "string" ? x.Subtheme === subtheme : true) &&
-          (typeof name === "string" ? x.SetName === name : true)
-        );
-      })
-    ) {
+
+// Function to process data with current omit list
+function processDataWithOmitList() {
+  const OMIT = getOmitList();
+
+  return flatData.reduce(
+    (acc, x) => {
+      if (!x || !x.ThemeGroup) return acc;
+      else if (
+        OMIT.some(([theme, subtheme, name]) => {
+          const hasValue =
+            typeof theme === "string" ||
+            typeof subtheme === "string" ||
+            typeof name === "string";
+          return (
+            hasValue &&
+            (typeof theme === "string" ? x.Theme === theme : true) &&
+            (typeof subtheme === "string" ? x.Subtheme === subtheme : true) &&
+            (typeof name === "string" ? x.SetName === name : true)
+          );
+        })
+      ) {
+        return acc;
+      }
+      const cardData = flatDataToCatalogCardData(x);
+      const [nested, byTheme, flat] = acc;
+
+      if (!nested[x.ThemeGroup]) {
+        nested[x.ThemeGroup] = {};
+      }
+      if (!nested[x.ThemeGroup][x.Theme]) {
+        nested[x.ThemeGroup][x.Theme] = {};
+      }
+      if (!nested[x.ThemeGroup][x.Theme][x.Subtheme]) {
+        nested[x.ThemeGroup][x.Theme][x.Subtheme] = [];
+      }
+
+      if (!byTheme[x.Theme]) {
+        byTheme[x.Theme] = [];
+        byTheme[x.Theme].title = x.Theme;
+      }
+
+      nested[x.ThemeGroup][x.Theme][x.Subtheme].push(cardData);
+      byTheme[x.Theme].push(cardData);
+      flat.push(cardData);
+      const subthemes = THEMES.get(x.Theme) || new Set();
+      THEMES.set(x.Theme, subthemes);
+      subthemes.add(x.Subtheme);
+
       return acc;
-    }
-    const cardData = flatDataToCatalogCardData(x);
-    const [nested, byTheme, flat] = acc;
+    },
+    [{}, {}, []],
+  );
+}
 
-    if (!nested[x.ThemeGroup]) {
-      nested[x.ThemeGroup] = {};
-    }
-    if (!nested[x.ThemeGroup][x.Theme]) {
-      nested[x.ThemeGroup][x.Theme] = {};
-    }
-    if (!nested[x.ThemeGroup][x.Theme][x.Subtheme]) {
-      nested[x.ThemeGroup][x.Theme][x.Subtheme] = [];
-    }
+// Initial data processing
+let [nestedCardData, byTheme, flatCardData] = processDataWithOmitList();
 
-    if (!byTheme[x.Theme]) {
-      byTheme[x.Theme] = [];
-      byTheme[x.Theme].title = x.Theme;
-    }
-
-    nested[x.ThemeGroup][x.Theme][x.Subtheme].push(cardData);
-    byTheme[x.Theme].push(cardData);
-    flat.push(cardData);
-    const subthemes = THEMES.get(x.Theme) || new Set();
-    THEMES.set(x.Theme, subthemes);
-    subthemes.add(x.Subtheme);
-
-    return acc;
-  },
-  [{}, {}, []],
-);
+// Function to refresh data (for when omit list changes)
+export function refreshData() {
+  [nestedCardData, byTheme, flatCardData] = processDataWithOmitList();
+  return Object.values(byTheme);
+}
 
 export default Object.values(byTheme);
 export { nestedCardData };
