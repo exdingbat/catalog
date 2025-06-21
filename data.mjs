@@ -1,5 +1,5 @@
 import flatData from "./flat.json" with { type: "json" };
-import { SKIP_SUBTHEMES, SKIP_THEMES, SKIP_NESTED } from "./constants.mjs";
+import OMIT from "./omit.mjs";
 import {
   getDate,
   getImg,
@@ -50,14 +50,19 @@ const [nestedCardData, byTheme, flatCardData] = flatData.reduce(
   (acc, x) => {
     if (!x || !x.ThemeGroup) return acc;
     else if (
-      SKIP_NESTED.some(
-        ([theme, subtheme]) => x.Theme === theme && x.Subtheme === subtheme,
-      )
+      OMIT.some(([theme, subtheme, name]) => {
+        const hasValue =
+          typeof theme === "string" ||
+          typeof subtheme === "string" ||
+          typeof name === "string";
+        return (
+          hasValue &&
+          (typeof theme === "string" ? x.Theme === theme : true) &&
+          (typeof subtheme === "string" ? x.Subtheme === subtheme : true) &&
+          (typeof name === "string" ? x.SetName === name : true)
+        );
+      })
     ) {
-      return acc;
-    } else if (SKIP_THEMES.includes(x.Theme)) {
-      return acc;
-    } else if (SKIP_SUBTHEMES.includes(x.Subtheme)) {
       return acc;
     }
     const cardData = flatDataToCatalogCardData(x);
