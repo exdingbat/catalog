@@ -1,0 +1,410 @@
+/* =====================
+   Root & Base Styles
+   ===================== */
+:root {
+  background-color: #202124;
+  color: white;
+  font-size: larger;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  --hidePrice: ;
+}
+
+body {
+  margin: 0;
+}
+
+/* =====================
+   Layout & Main Content
+   ===================== */
+#main {
+  /* display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: start; */
+  padding-right: 10px;
+  padding-left: 10px;
+  margin: 0;
+  max-width: calc(100vw - 20px);
+  /* Enable hardware acceleration for better performance */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* =====================
+   Search, Filters
+   ===================== */
+
+.search-container > form {
+  max-width: fit-content;
+  width: 100%;
+  min-width: 300px;
+}
+.search-container {
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  position: sticky;
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  left: 0px;
+  top: 0px;
+  right: 0px;
+  z-index: 2;
+  width: 100%;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-wrapper input[type="search"] {
+  flex: 1;
+  padding: 8px 40px 8px 12px;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.search-input-wrapper input[type="search"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.search-button {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+.search-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.search-results {
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.filters-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.filters-container select {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.filters-container select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+label {
+  user-select: none;
+}
+
+/* =====================
+   Catalog Card Styles (Global)
+   ===================== */
+.row {
+  break-inside: avoid-column;
+  border: solid thin white;
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 5px;
+  margin-bottom: 10px;
+  background-color: #8d9093;
+  border-radius: 2px;
+  /* Enable hardware acceleration for better performance */
+  transform: translateZ(0);
+  will-change: transform;
+  /* Optimize for compositing */
+  contain: layout style paint;
+}
+
+/* Placeholder styles for IntersectionObserver */
+.row.placeholder {
+  background: linear-gradient(90deg, #8d9093 25%, #a0a3a6 50%, #8d9093 75%);
+  background-size: 200% 100%;
+  animation: placeholder-shimmer 1.5s infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 12px;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.row.placeholder::before {
+  content: "Loading...";
+  font-style: italic;
+}
+
+@keyframes placeholder-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.img {
+  object-fit: scale-down;
+  max-height: 100%;
+  background-color: white;
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  /* Optimize image rendering */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* Enable hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.price {
+  font-family: monospace;
+  font-size: 1.1rem;
+  color: hsl(6, 92%, 75%);
+  background-color: rgba(255, 217, 0, 0.4);
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  padding: 4px;
+  display: var(--hidePrice);
+  backdrop-filter: blur(3px);
+  /* Optimize for compositing */
+  contain: layout style paint;
+}
+
+.price::before {
+  content: "$";
+}
+
+.linkWrapper {
+  max-height: 90px;
+  min-height: 70px;
+  padding: 5px;
+  padding-top: 0px;
+  font-size: 0.7rem;
+  font-family: monospace;
+}
+
+.year {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  color: white;
+  background-color: #4d5156a3;
+  backdrop-filter: blur(3px);
+  font-size: 1.3rem;
+  padding: 4px;
+  margin: 0;
+}
+
+.name {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.text-outline {
+  text-shadow:
+    0 0 1px #222,
+    0 0 2px #222,
+    0 0 3px #222;
+}
+
+.retired {
+  color: #eed202;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-variant: small-caps;
+}
+
+/* .multicol,
+.multicol:empty {
+  display: none;
+} */
+
+.multicol {
+  column-gap: 10px;
+  column-count: var(--col, 1);
+  max-width: calc(100vw - 40px);
+}
+
+.multicol > * {
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin: 5px;
+  padding: 8px 12px;
+  background-color: #4d5156;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1rem;
+}
+
+h2:hover {
+  background-color: #5a5f65;
+}
+
+h2:active {
+  background-color: #3d4146;
+}
+
+h2::after {
+  display: inline-block;
+  content: "▼";
+  transform: translateY(-50%);
+  font-size: 12px;
+  transition: transform 0.2s ease;
+}
+
+h2[data-collapsed="true"]::after {
+  transform: translateY(-50%) rotate(-90deg);
+}
+[hidden] {
+  display: none !important;
+}
+
+h2:has(+ .list > .row:not([hidden])) {
+  display: block;
+}
+
+h2 {
+  display: none;
+}
+h2:has(+ .list:has(> .row:not([hidden]))) {
+  display: block;
+}
+
+h2[data-collapsed="true"] + .list {
+  display: none;
+}
+
+/* .list {
+  display: none;
+}
+.list:has(row:not([hidden])) {
+  display: block;
+}
+.row[hidden] {
+  display: none;
+} */
+
+/* =====================
+   Dialog Styles
+   ===================== */
+dialog[open] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  height: auto;
+  width: auto;
+  max-height: 90vh;
+  max-width: 90vw;
+}
+
+dialog button {
+  z-index: 2;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+dialog img {
+  margin: auto;
+  object-fit: scale-down;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+/* =====================
+   Responsive Design
+   ===================== */
+@media (max-width: 768px) {
+  .search-input-wrapper {
+    max-width: 100%;
+  }
+  .filters-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .filters-container select {
+    width: 100%;
+  }
+}
+
+/* =====================
+   Loading State
+   ===================== */
+.search-loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.search-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 40px;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

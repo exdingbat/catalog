@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgo=" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>City Lego</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <div class="search-container">
+    <form id="searchForm">
+      <div class="search-input-wrapper">
+        <input type="search" name="search" id="search" placeholder="Search sets, themes, numbers..."
+          list="searchSuggestions" />
+
+        <datalist id="searchSuggestions">
+          <option value="theme:">
+          <option value="subtheme:">
+          <option value="name:">
+          <option value="itemnumber:">
+          <option value="year:">
+        </datalist>
+        <button type="submit" class="search-button">🔍</button>
+      </div>
+    </form>
+    <div id="searchResults" class="search-results" style="display: none;">
+      <span id="resultCount"></span>
+    </div>
+  </div>
+
+  <div class="filters-container">
+    <label id="hidePriceLabel" for="hidePrice"> price </label>
+    <input id="hidePrice" name="hidePrice" class="hidePrice" type="checkbox" />
+  </div>
+
+
+  <div id="main"></div>
+  <dialog>
+    <button autofocus>Close</button>
+    <img id="modal-img" />
+  </dialog>
+
+  <script type="module" src="catalog.mjs"></script>
+</body>
+
+</html>
