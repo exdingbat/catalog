@@ -1,20 +1,14 @@
-import {
-  performSearch,
-  performSearchWithFlatData,
-  CURRENT_SEARCH_STATE,
-} from "./search.mjs";
+import { performSearch } from "./search.mjs";
 import data, { THEMES } from "./data.mjs";
 import { CATALOG_DATA } from "./catalogData.mjs";
 import { createCatalogCard } from "./catalogCard.mjs";
-const NOW = new Date();
+const INITIAL_COLLAPSED = "true";
 const DIALOG = document.querySelector("dialog");
 const DIALOG_BUTTON = document.querySelector("dialog button");
 const MAIN = document.getElementById("main");
 const SEARCH_FORM = document.getElementById("searchForm");
 const SEARCH = document.getElementById("search");
 const INITIAL_QUERY = new URLSearchParams(window.location.search).get("q");
-const RESULT_COUNT = document.getElementById("resultCount");
-const SEARCH_RESULTS = document.getElementById("searchResults");
 // Cache for DOM elements and data
 const DATA_CACHE = new Map();
 // --- Dynamic search suggestions for themes and subthemes ---
@@ -157,12 +151,12 @@ function makeListItems(items) {
   if (!items.length) return null;
 
   const listData = getListItemData(items);
+
   const h2 = document.createElement("h2");
   h2.append(items.title);
 
   // Add collapsible functionality to the heading
-  const collapsed = items.title === "Time Cruisers" ? "false" : "true";
-  h2.setAttribute("data-collapsed", collapsed);
+  h2.setAttribute("data-collapsed", INITIAL_COLLAPSED);
 
   const listItems = [];
 
@@ -171,27 +165,10 @@ function makeListItems(items) {
     initializeIntersectionObserver();
   }
 
-  // Pre-filter data if there's an initial query
-  let filteredData = listData;
-  if (INITIAL_QUERY) {
-    try {
-      const searchResults = performSearchWithFlatData(INITIAL_QUERY);
-      const resultSetNumbers = new Set(
-        searchResults.map((r) => `${r.itemnumber}`)
-      );
-      filteredData = filteredData.filter((item) =>
-        resultSetNumbers.has(item.itemnumber)
-      );
-    } catch (error) {
-      console.error("Error pre-filtering data:", error);
-      // Fallback to showing all data if search fails
-      filteredData = listData;
-    }
-  }
-
-  // Create placeholders only for filtered data
-  filteredData.forEach((itemData) => {
+  // Create placeholders for all data (no pre-filtering)
+  listData.forEach((itemData) => {
     const placeholder = createPlaceholder(itemData);
+
     intersectionObserver.observe(placeholder);
     listItems.push(placeholder);
   });
@@ -206,7 +183,7 @@ function makeList({ title, listItems }) {
   i++;
 
   // Cache column count calculation
-  const colCount = Math.floor(window.innerWidth / 235);
+  const colCount = Math.max(2, Math.floor(window.innerWidth / 235));
   list.style.setProperty(`--col`, colCount);
 
   // Add click handler for collapsible functionality
@@ -311,21 +288,10 @@ if (INITIAL_QUERY) {
   SEARCH.value = INITIAL_QUERY;
 }
 
-if (INITIAL_QUERY) {
-  const results = performSearchWithFlatData(INITIAL_QUERY);
-  CURRENT_SEARCH_STATE.isActive = true;
-  CURRENT_SEARCH_STATE.resultSetNumbers = new Set(
-    results.map((r) => `${r.itemnumber}`)
-  );
-
-  if (INITIAL_QUERY && results.length > 0) {
-    RESULT_COUNT.textContent = `Found ${results.length} result${
-      results.length === 1 ? "" : "s"
-    } for "${INITIAL_QUERY}"`;
-    SEARCH_RESULTS.style.display = "flex";
-  } else if (INITIAL_QUERY && results.length === 0) {
-    RESULT_COUNT.textContent = `No results found for "${INITIAL_QUERY}"`;
-    SEARCH_RESULTS.style.display = "flex";
-  }
-}
+// Render all lists first (all placeholders will be created)
 renderLists();
+
+// Apply initial search after rendering all placeholders
+if (INITIAL_QUERY) {
+  performSearch(INITIAL_QUERY);
+}
