@@ -3,47 +3,71 @@ const OMIT_STORAGE_KEY = "lego-app-omit-list";
 
 // Default omit list (same as the original omit.mjs)
 const DEFAULT_OMIT_LIST = [
-  [, , "{Catapult}"],
-  [, "Bonus/Value Pack"],
-  [, "Book Parts"],
-  [, "Formula 1"],
-  [, "Magazine Gift"],
-  [, "Product Collection"],
+  [, , , "{Catapult}"],
+  [, , "Bonus/Value Pack"],
+  [, , "Book Parts"],
+  [, , "Formula 1"],
+  [, , "Magazine Gift"],
+  [, , "Product Collection"],
+  [, , "Promotional"],
+  [, , "Seasonal"],
+  [, , "Special"],
+  [, "Creator", ""],
+  [, "Creator", "8 in 1"],
+  [, "Creator", "Botanical Collection"],
+  [, "Creator", "Bulk Set"],
+  [, "Creator", "Inventor Set"],
+  [, "Creator", "Miscellaneous"],
+  [, "Creator", "Postcard"],
+  [, "Discovery"],
+  [, "Icons", "Adidas"],
+  [, "Icons", "Botanical Collection"],
+  [, "Icons", "Gardens of the World"],
+  [, "Icons", "Landmarks"],
+  [, "Icons", "Miscellaneous"],
+  [, "Icons", "Nike"],
+  [, "Icons", "Restaurants of the World"],
+  [, "Icons", "Space"],
+  [, "Icons", "Stadiums"],
+  [, "Icons", "Vehicles"],
   [, "Promotional"],
-  [, "Seasonal"],
-  [, "Special"],
-  ["Creator", ""],
-  ["Creator", "8 in 1"],
-  ["Creator", "Botanical Collection"],
-  ["Creator", "Bulk Set"],
-  ["Creator", "Inventor Set"],
-  ["Creator", "Miscellaneous"],
-  ["Creator", "Postcard"],
-  ["Discovery"],
-  ["Icons", "Adidas"],
-  ["Icons", "Botanical Collection"],
-  ["Icons", "Gardens of the World"],
-  ["Icons", "Landmarks"],
-  ["Icons", "Miscellaneous"],
-  ["Icons", "Nike"],
-  ["Icons", "Restaurants of the World"],
-  ["Icons", "Space"],
-  ["Icons", "Stadiums"],
-  ["Icons", "Vehicles"],
-  ["Promotional"],
-  ["Sports"],
-  [, "Fantasy Era"],
+  [, "Sports"],
+  [, , "Fantasy Era"],
 ];
+
+// Get available theme groups from the data
+export async function getAvailableThemeGroups() {
+  try {
+    // Import the data module dynamically to avoid circular dependencies
+    const { nestedCardData } = await import("./data.mjs");
+    return Object.keys(nestedCardData).sort();
+  } catch (error) {
+    console.warn("Failed to get theme groups:", error);
+    return [];
+  }
+}
 
 // Get omit list from localStorage or use default
 export function getOmitList() {
   try {
     const stored = localStorage.getItem(OMIT_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : DEFAULT_OMIT_LIST;
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Migrate old 3-field rules to new 4-field structure
+      const migrated = parsed.map((rule) => {
+        if (rule.length === 3) {
+          // Old format: [theme, subtheme, name] -> New format: [themeGroup, theme, subtheme, name]
+          return [null, rule[0], rule[1], rule[2]];
+        }
+        return rule;
+      });
+      return migrated;
+    }
+    return DEFAULT_OMIT_LIST;
   } catch (error) {
     console.warn(
       "Failed to load omit list from localStorage, using default:",
-      error,
+      error
     );
     return DEFAULT_OMIT_LIST;
   }
@@ -67,13 +91,23 @@ export function resetOmitList() {
 }
 
 // Add new omit rule
-export function addOmitRule(theme = "", subtheme = "", name = "") {
+export function addOmitRule(
+  themeGroup = "",
+  theme = "",
+  subtheme = "",
+  name = ""
+) {
   const omitList = getOmitList();
-  const newRule = [theme || null, subtheme || null, name || null];
+  const newRule = [
+    themeGroup || null,
+    theme || null,
+    subtheme || null,
+    name || null,
+  ];
 
   // Check if rule already exists
   const exists = omitList.some(
-    (rule) => JSON.stringify(rule) === JSON.stringify(newRule),
+    (rule) => JSON.stringify(rule) === JSON.stringify(newRule)
   );
 
   if (!exists) {
@@ -95,17 +129,28 @@ export function removeOmitRule(index) {
 }
 
 // Update omit rule by index
-export function updateOmitRule(index, theme = "", subtheme = "", name = "") {
+export function updateOmitRule(
+  index,
+  themeGroup = "",
+  theme = "",
+  subtheme = "",
+  name = ""
+) {
   const omitList = getOmitList();
   if (index >= 0 && index < omitList.length) {
-    omitList[index] = [theme || null, subtheme || null, name || null];
+    omitList[index] = [
+      themeGroup || null,
+      theme || null,
+      subtheme || null,
+      name || null,
+    ];
     saveOmitList(omitList);
   }
   return omitList;
 }
 
 // Create omit list management UI
-export function createOmitListUI() {
+export async function createOmitListUI() {
   const container = document.createElement("div");
   container.className = "omit-list-container";
   container.innerHTML = `
@@ -131,6 +176,9 @@ export function createOmitListUI() {
   const itemsContainer = container.querySelector(".omit-list-items");
   const emptyMessage = container.querySelector(".omit-list-empty");
 
+  // Get available theme groups
+  const themeGroups = await getAvailableThemeGroups();
+
   // Render omit list
   function renderOmitList() {
     const omitList = getOmitList();
@@ -147,13 +195,30 @@ export function createOmitListUI() {
           (rule, index) => `
         <div class="omit-rule" data-index="${index}">
           <div class="omit-rule-fields">
-            <input type="text" class="omit-theme" placeholder="Theme (optional)" value="${rule[0] || ""}" />
-            <input type="text" class="omit-subtheme" placeholder="Subtheme (optional)" value="${rule[1] || ""}" />
-            <input type="text" class="omit-name" placeholder="Set name (optional)" value="${rule[2] || ""}" />
+            <select class="omit-theme-group" title="Theme Group (optional)">
+              <option value="">Theme Group (optional)</option>
+              ${themeGroups
+                .map(
+                  (group) =>
+                    `<option value="${group}" ${
+                      rule[0] === group ? "selected" : ""
+                    }>${group}</option>`
+                )
+                .join("")}
+            </select>
+            <input type="text" class="omit-theme" placeholder="Theme (optional)" value="${
+              rule[1] || ""
+            }" />
+            <input type="text" class="omit-subtheme" placeholder="Subtheme (optional)" value="${
+              rule[2] || ""
+            }" />
+            <input type="text" class="omit-name" placeholder="Set name (optional)" value="${
+              rule[3] || ""
+            }" />
           </div>
           <button type="button" class="omit-remove-btn" title="Remove rule">×</button>
         </div>
-      `,
+      `
         )
         .join("");
 
@@ -171,17 +236,19 @@ export function createOmitListUI() {
         });
       });
 
-      // Add event listeners to input fields
+      // Add event listeners to input fields and select
       itemsContainer
-        .querySelectorAll(".omit-rule-fields input")
+        .querySelectorAll(".omit-rule-fields input, .omit-rule-fields select")
         .forEach((input) => {
           input.addEventListener("change", (e) => {
             const ruleElement = e.target.closest(".omit-rule");
             const index = parseInt(ruleElement.dataset.index);
+            const themeGroup =
+              ruleElement.querySelector(".omit-theme-group").value;
             const theme = ruleElement.querySelector(".omit-theme").value;
             const subtheme = ruleElement.querySelector(".omit-subtheme").value;
             const name = ruleElement.querySelector(".omit-name").value;
-            updateOmitRule(index, theme, subtheme, name);
+            updateOmitRule(index, themeGroup, theme, subtheme, name);
             // Trigger data refresh
             if (window.refreshCatalogData) {
               window.refreshCatalogData();
@@ -228,13 +295,14 @@ export function createOmitListUI() {
 }
 
 // Show/hide omit list dialog
-export function toggleOmitListDialog() {
+export async function toggleOmitListDialog() {
   let dialog = document.querySelector(".omit-list-dialog");
 
   if (!dialog) {
     dialog = document.createElement("div");
     dialog.className = "omit-list-dialog";
-    dialog.appendChild(createOmitListUI());
+    const ui = await createOmitListUI();
+    dialog.appendChild(ui);
 
     // Add click outside to close functionality
     dialog.addEventListener("click", (e) => {

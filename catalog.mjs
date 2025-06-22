@@ -60,7 +60,9 @@ function addOmitListButton() {
   omitButton.className = "omit-list-btn";
   omitButton.title = "Manage filter rules";
   omitButton.innerHTML = "⚙️";
-  omitButton.addEventListener("click", toggleOmitListDialog);
+  omitButton.addEventListener("click", async () => {
+    await toggleOmitListDialog();
+  });
 
   // Insert after the search form
   searchContainer.insertBefore(omitButton, searchContainer.children[1]);

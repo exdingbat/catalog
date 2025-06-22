@@ -519,7 +519,8 @@ dialog img {
   align-items: center;
 }
 
-.omit-rule-fields input {
+.omit-rule-fields input,
+.omit-rule-fields select {
   flex: 1;
   min-width: 80px;
   padding: 4px 6px;
@@ -529,10 +530,10 @@ dialog img {
   transition: border-color 0.2s ease;
 }
 
-.omit-rule-fields input:focus {
+.omit-rule-fields input:focus,
+.omit-rule-fields select:focus {
   outline: none;
   border-color: #007bff;
-
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 

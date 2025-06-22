@@ -55,13 +55,17 @@ async function processDataWithOmitList() {
     (acc, x) => {
       if (!x || !x.ThemeGroup) return acc;
       else if (
-        OMIT.some(([theme, subtheme, name]) => {
+        OMIT.some(([themeGroup, theme, subtheme, name]) => {
           const hasValue =
+            typeof themeGroup === "string" ||
             typeof theme === "string" ||
             typeof subtheme === "string" ||
             typeof name === "string";
           return (
             hasValue &&
+            (typeof themeGroup === "string"
+              ? x.ThemeGroup === themeGroup
+              : true) &&
             (typeof theme === "string" ? x.Theme === theme : true) &&
             (typeof subtheme === "string" ? x.Subtheme === subtheme : true) &&
             (typeof name === "string" ? x.SetName === name : true)
