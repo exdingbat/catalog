@@ -1,8 +1,15 @@
-import { performSearch } from "./search.mjs";
 import data, { THEMES, refreshData } from "./data.mjs";
+import { performSearch } from "./search.mjs";
 import { CATALOG_DATA } from "./catalogData.mjs";
 import { createCatalogCard } from "./catalogCard.mjs";
-import { toggleOmitListDialog } from "./omitManager.mjs";
+import {
+  toggleOmitListDialog,
+  initializeOmitListUI,
+  getOmitList,
+  addOmitRule,
+  removeOmitRule,
+} from "./omitManager.mjs";
+import { toggleThemeHierarchyDialog } from "./themeHierarchy.mjs";
 
 const INITIAL_COLLAPSED = "true";
 const DIALOG = document.querySelector("dialog");
@@ -10,13 +17,15 @@ const DIALOG_BUTTON = document.querySelector("dialog button");
 const MAIN = document.getElementById("main");
 const SEARCH_FORM = document.getElementById("searchForm");
 const SEARCH = document.getElementById("search");
+const SEARCH_SUGGESTIONS = document.getElementById("searchSuggestions");
+const SEARCH_RESULTS = document.getElementById("searchResults");
+const RESULT_COUNT = document.getElementById("resultCount");
 const INITIAL_QUERY = new URLSearchParams(window.location.search).get("q");
 
 // Cache for DOM elements and data
 const DATA_CACHE = new Map();
 
 // --- Dynamic search suggestions for themes and subthemes ---
-const SEARCH_SUGGESTIONS = document.getElementById("searchSuggestions");
 const STATIC_OPTIONS = [
   { value: "theme:" },
   { value: "subtheme:" },
@@ -55,17 +64,30 @@ SEARCH_FORM.addEventListener("submit", (e) => {
 // Add omit list management button to search container
 function addOmitListButton() {
   const searchContainer = document.querySelector(".search-container");
+
+  // Create omit button
   const omitButton = document.createElement("button");
   omitButton.type = "button";
   omitButton.className = "omit-list-btn";
   omitButton.title = "Manage filter rules";
   omitButton.innerHTML = "⚙️";
-  omitButton.addEventListener("click", async () => {
-    await toggleOmitListDialog();
+  omitButton.addEventListener("click", () => {
+    toggleOmitListDialog();
   });
 
-  // Insert after the search form
+  // Create theme hierarchy button
+  const hierarchyButton = document.createElement("button");
+  hierarchyButton.type = "button";
+  hierarchyButton.className = "theme-hierarchy-btn";
+  hierarchyButton.title = "View theme hierarchy";
+  hierarchyButton.innerHTML = "🌳";
+  hierarchyButton.addEventListener("click", () => {
+    toggleThemeHierarchyDialog();
+  });
+
+  // Insert both buttons after the search form
   searchContainer.insertBefore(omitButton, searchContainer.children[1]);
+  searchContainer.insertBefore(hierarchyButton, searchContainer.children[2]);
 }
 
 // Function to refresh catalog data (exposed globally)
@@ -154,7 +176,7 @@ function initializeIntersectionObserver() {
     {
       rootMargin: "200px",
       threshold: 0.1,
-    }
+    },
   );
 }
 
@@ -169,7 +191,7 @@ const getListItemData = (rows) => {
   }
 
   const result = rows.sort((a, b) =>
-    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year
+    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year,
   );
 
   DATA_CACHE.set(cacheKey, result);
@@ -190,7 +212,62 @@ function makeListItems(items) {
     h2.setAttribute("data-collapsed", !isCollapsed);
   });
 
-  button.append(items.title);
+  button.innerHTML = `${items.title} <span style="font-family:sans-serif; font-size: 12px; margin-left: 1em;">${items[0].themeGroup}</span>`;
+
+  // Add omit control for the theme
+  const themeName = items.title;
+  const themeGroupName = items[0].themeGroup;
+  const omitList = getOmitList();
+
+  // Check if this theme is currently omitted
+  const isOmitted = omitList.some(
+    (rule) =>
+      (rule[0] === themeGroupName || rule[0] === null) && rule[1] === themeName,
+  );
+
+  // Create omit control button
+  const omitControl = document.createElement("button");
+  omitControl.className = "h2-omit-control";
+  omitControl.title = isOmitted
+    ? "Remove filter for this theme"
+    : "Filter out this theme";
+  omitControl.textContent = "🚫";
+
+  omitControl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (isOmitted) {
+      // Remove the omit rule
+      const currentOmitList = getOmitList();
+      const ruleIndex = currentOmitList.findIndex(
+        (rule) =>
+          (rule[0] === themeGroupName || rule[0] === null) &&
+          rule[1] === themeName,
+      );
+      if (ruleIndex !== -1) {
+        removeOmitRule(ruleIndex);
+        // Update the button appearance
+        omitControl.textContent = "🚫";
+        omitControl.title = "Filter out this theme";
+        // Refresh catalog data
+        if (window.refreshCatalogData) {
+          window.refreshCatalogData();
+        }
+      }
+    } else {
+      // Add omit rule for this theme
+      addOmitRule(themeGroupName, themeName, "", "");
+      // Update the button appearance
+      omitControl.textContent = "✅";
+      omitControl.title = "Remove filter for this theme";
+      // Refresh catalog data
+      if (window.refreshCatalogData) {
+        window.refreshCatalogData();
+      }
+    }
+  });
+
+  // Add omit control first, then the button
+  h2.appendChild(omitControl);
   h2.append(button);
   // Add collapsible functionality to the heading
   h2.setAttribute("data-collapsed", INITIAL_COLLAPSED);
@@ -274,7 +351,7 @@ function updateSearchSuggestions(inputValue = "") {
   }
   if (trimmed.startsWith("subtheme:")) {
     for (const subtheme of new Set(
-      [...THEMES.values()].map((x) => [...x]).flat()
+      [...THEMES.values()].map((x) => [...x]).flat(),
     )) {
       const opt = document.createElement("option");
       opt.value = `subtheme:${subtheme}`;
@@ -321,6 +398,9 @@ if (INITIAL_QUERY) {
 
 // Initialize omit list button
 addOmitListButton();
+
+// Initialize omit list UI
+initializeOmitListUI();
 
 // Render all lists first (all placeholders will be created)
 renderLists(data);

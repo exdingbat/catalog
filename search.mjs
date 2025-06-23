@@ -97,9 +97,11 @@ function evaluateAST(node, catalogEntry) {
           return cardValue === value;
         }
         const cardValue = catalogEntry[field];
-        return cardValue && cardValue.toString().toLowerCase().includes(value);
+        return (
+          cardValue && cardValue.toString().toLowerCase().includes(value.trim())
+        );
       } else {
-        const value = node.value?.toLowerCase();
+        const value = node.value?.toLowerCase().trim();
         const searchableText = [
           catalogEntry.name,
           catalogEntry.theme,
@@ -182,7 +184,7 @@ export function performSearch(query) {
 function applySearchResults(currentSearchResults) {
   const resultSetNumbers = new Set(
     // currentSearchResults.map((r) => `${r.Number}-${r.Variant}`),
-    currentSearchResults.map((r) => `${r.itemnumber}`)
+    currentSearchResults.map((r) => `${r.itemnumber}`),
   );
 
   CURRENT_SEARCH_STATE.isActive = true;
@@ -209,9 +211,7 @@ function applySearchResults(currentSearchResults) {
 
 function updateSearchResultsDisplay(query, total) {
   if (query && total > 0) {
-    RESULT_COUNT.textContent = `Found ${total} result${
-      total === 1 ? "" : "s"
-    } for "${query}"`;
+    RESULT_COUNT.textContent = `Found ${total} result${total === 1 ? "" : "s"} for "${query}"`;
     SEARCH_RESULTS.style.display = "flex";
   } else if (query && total === 0) {
     RESULT_COUNT.textContent = `No results found for "${query}"`;

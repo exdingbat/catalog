@@ -8,6 +8,23 @@
   <title>🧱🗃️ Interactive Lego Catalog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="styles.css" />
+
+  <!-- Service Worker Registration -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('Service Worker registered successfully:', registration.scope);
+          })
+          .catch(error => {
+            console.log('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
+
+  <script type="module" src="data.mjs"></script>
 </head>
 
 <body>
@@ -31,9 +48,105 @@
     </div>
   </div>
   <div id="main"></div>
-  <dialog>
-    <button autofocus>Close</button>
-    <img id="modal-img" />
+
+  <!-- Large Image Dialog - Modern Native HTML -->
+  <dialog class="large-image-dialog">
+    <form method="dialog" class="large-image-container">
+      <div class="large-image-content">
+        <img id="modal-img" alt="Lego set image" />
+      </div>
+      <footer class="large-image-footer">
+        <button type="submit" class="large-image-close-btn" autofocus>Close</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Omit List Dialog - Native HTML -->
+  <dialog id="omit-list-dialog" class="omit-list-dialog">
+    <form method="dialog" class="omit-list-container">
+      <header class="omit-list-header">
+        <h3>Filter Rules</h3>
+      </header>
+
+      <div class="omit-list-content">
+        <fieldset class="omit-input-section">
+          <legend>Add New Filter Rule</legend>
+          <div class="omit-input-form">
+            <div class="input-group">
+              <label for="omit-theme-group">Theme Group</label>
+              <input type="text" id="omit-theme-group" name="themeGroup" list="theme-group-options"
+                placeholder="Enter theme group" autocomplete="off" />
+              <datalist id="theme-group-options"></datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="omit-theme">Theme</label>
+              <input type="text" id="omit-theme" name="theme" list="theme-options" placeholder="Enter theme"
+                autocomplete="off" />
+              <datalist id="theme-options"></datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="omit-subtheme">Subtheme</label>
+              <input type="text" id="omit-subtheme" name="subtheme" list="subtheme-options" placeholder="Enter subtheme"
+                autocomplete="off" />
+              <datalist id="subtheme-options"></datalist>
+            </div>
+
+            <div class="input-group">
+              <label for="omit-name">Set Name (optional)</label>
+              <input type="text" id="omit-name" name="name" placeholder="Enter set name" autocomplete="off" />
+            </div>
+
+            <button type="submit" class="omit-add-rule-btn">Add Filter Rule</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="omit-pills-section">
+          <legend>Current Filter Rules</legend>
+          <ul class="omit-pills-container" role="list"></ul>
+          <div class="omit-list-empty" style="display: none;">
+            <p>No filter rules defined. All sets will be shown.</p>
+          </div>
+        </fieldset>
+
+        <details class="omit-help">
+          <summary>How to use filter rules</summary>
+          <div>
+            <p><strong>Filter by:</strong> Theme Group, Theme, Subtheme, or Set Name</p>
+            <p><strong>Examples:</strong></p>
+            <ul>
+              <li><strong>Theme Group:</strong> "Creator" - Filter all Creator sets</li>
+              <li><strong>Theme:</strong> "Icons" - Filter all Icons sets</li>
+              <li><strong>Subtheme:</strong> "Botanical Collection" - Filter all Botanical Collection sets</li>
+              <li><strong>Set Name:</strong> "{Catapult}" - Filter sets with "Catapult" in the name</li>
+            </ul>
+            <p><em>Leave fields empty to skip that filter. Autocomplete is available for Theme Group, Theme, and
+                Subtheme.</em></p>
+          </div>
+        </details>
+      </div>
+
+      <footer class="omit-list-footer">
+        <button type="button" class="omit-reset-btn">Reset to Default</button>
+        <button type="button" class="omit-close-btn" value="cancel">Close</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Theme Hierarchy Dialog - Modern Native HTML -->
+  <dialog class="theme-hierarchy-dialog">
+    <div class="theme-hierarchy-container">
+      <header class="theme-hierarchy-header">
+        <h3>Theme Hierarchy</h3>
+      </header>
+      <div class="theme-hierarchy-content">
+        <div class="theme-hierarchy-tree"></div>
+      </div>
+      <footer class="theme-hierarchy-footer">
+        <button type="button" class="theme-hierarchy-close-btn">Close</button>
+      </footer>
+    </div>
   </dialog>
 
   <script type="module" src="catalog.mjs"></script>

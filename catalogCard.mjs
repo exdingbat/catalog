@@ -5,7 +5,8 @@
 import { CATALOG_DATA } from "./catalogData.mjs";
 
 let dialogImg;
-const DIALOG = document.querySelector("dialog");
+/** @type {HTMLDialogElement | null} */
+const LARGE_IMAGE_DIALOG = document.querySelector(".large-image-dialog");
 
 export function createCatalogCard(data) {
   /** @type {HTMLDivElement & {_cardData?: typeof data}} */
@@ -25,15 +26,9 @@ export function createCatalogCard(data) {
           <div>${data.note || ""}
           <span class="retired text-outline">retired</span> </div>
           <div class="links">
-          <a class="legoLink" href="${
-            data.links?.lego || "#"
-          }" target="_blank">Lego</a>
-          <a class="bricksetLink" href="${
-            data.links?.brickset || "#"
-          }" target="_blank">Brickset</a>
-          <a class="bricklinkLink" href="${
-            data.links?.bricklink || "#"
-          }" target="_blank">Bricklink</a>
+          <a class="legoLink" href="${data.links?.lego || "#"}" target="_blank">Lego</a>
+          <a class="bricksetLink" href="${data.links?.brickset || "#"}" target="_blank">Brickset</a>
+          <a class="bricklinkLink" href="${data.links?.bricklink || "#"}" target="_blank">Bricklink</a>
           </div>
       </div>
     `;
@@ -51,14 +46,15 @@ export function createCatalogCard(data) {
         if (img.src && !dialogImg) {
           dialogImg = document.getElementById("modal-img");
         }
-        if (img.src && dialogImg && DIALOG) {
+        if (img.src && dialogImg && LARGE_IMAGE_DIALOG) {
           dialogImg.src = "";
-          dialogImg.src = img.src.replace("images", "large");
-          DIALOG.style.visibility = "visible";
-          DIALOG.showModal();
+          dialogImg.src = img.src
+            .replace("images", "large")
+            .replace("_med.", ".");
+          LARGE_IMAGE_DIALOG.showModal();
         }
       },
-      { passive: true }
+      { passive: true },
     );
   }
   // Set aspect ratio if provided
