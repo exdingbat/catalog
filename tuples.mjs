@@ -48,7 +48,7 @@ function base64ToUint8Array(base64) {
 
 // Decompress and parse the data
 async function loadData() {
-  const json = import("./tuples.json");
+  const json = await import("./tuples.json", { type: "json" });
   return json;
 }
 
