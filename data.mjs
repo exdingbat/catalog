@@ -15,7 +15,11 @@ export const THEMES = new Map();
 export const THEME_GROUPS = new Map();
 
 function flatDataToCatalogCardData(x) {
-  const retiredDate = new Date(x.ExitDate || x.USDateRemoved);
+  let retiredDate = new Date(x.ExitDate || x.USDateRemoved);
+  if (retiredDate.getFullYear() === 1969) {
+    retiredDate = null;
+  }
+
   const retired =
     retiredDate === null ||
     (retiredDate < NOW && retiredDate.getFullYear() !== 2025);
@@ -60,7 +64,7 @@ async function loadTuplesWithCache() {
         return buildFromTuples(
           cachedData.keys || [],
           cachedData.lookups || [],
-          cachedData.tupleList || [],
+          cachedData.tupleList || []
         );
       }
     }
@@ -70,7 +74,7 @@ async function loadTuplesWithCache() {
   } catch (error) {
     console.warn(
       "Service worker cache failed, falling back to direct loading:",
-      error,
+      error
     );
     return await loadTuples();
   }
@@ -146,14 +150,14 @@ async function processDataWithOmitList() {
 
       return acc;
     },
-    [{}, {}, []],
+    [{}, {}, []]
   );
 
   // Sort themes alphabetically by theme group first, then by theme name
   const sortedThemes = Object.values(result[1]).sort((a, b) => {
     // First sort by theme group
     const themeGroupComparison = (a.themeGroup || "").localeCompare(
-      b.themeGroup || "",
+      b.themeGroup || ""
     );
     if (themeGroupComparison !== 0) {
       return themeGroupComparison;
@@ -176,3 +180,5 @@ export async function refreshData() {
 export default byTheme; // Export the sorted array directly
 export { nestedCardData };
 export { flatCardData };
+window.CARD_DATA = nestedCardData;
+console.log("window.CARD_DATA", window.CARD_DATA);

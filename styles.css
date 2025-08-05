@@ -27,7 +27,7 @@ body {
 .search-container > form {
   max-width: min(100vw, 800px);
   width: 100%;
-  min-width: 400px;
+  min-width: 300px;
 }
 h2 > button {
   flex: 1;
@@ -221,6 +221,7 @@ label {
   padding: 4px;
   display: var(--hidePrice);
   backdrop-filter: blur(3px);
+  backdrop-filter: unset;
   /* Optimize for compositing */
   contain: layout style paint;
 }
@@ -245,9 +246,11 @@ label {
   color: white;
   background-color: #4d5156a3;
   backdrop-filter: blur(3px);
+  backdrop-filter: none;
   font-size: 1.3rem;
   padding: 4px;
   margin: 0;
+  display: flex;
 }
 
 .name {
@@ -257,10 +260,7 @@ label {
 }
 
 .text-outline {
-  text-shadow:
-    0 0 1px #222,
-    0 0 2px #222,
-    0 0 3px #222;
+  text-shadow: 0 0 1px #222, 0 0 2px #222, 0 0 3px #222;
 }
 
 .retired {
@@ -269,22 +269,29 @@ label {
   font-variant: small-caps;
 }
 
-.multicol {
+/* .multicol {
   column-gap: 10px;
   column-count: var(--col, 1);
-}
+} */
 
-.multicol > * {
+/* .multicol > div {
   margin-bottom: 10px;
+} */
+
+.masonry {
+  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(var(--col), 1fr);
+  grid-template-rows: masonry;
 }
 
-h2 > button {
-  padding: 5px 0px !important;
+.masonry > * {
+  margin: 0;
 }
 
 h2 {
   padding: 0px 12px;
-
+  padding-right: 0px;
   margin: 0px;
   background-color: #4d5156;
   border-radius: 4px;
@@ -322,7 +329,11 @@ h2[data-collapsed="false"]:active {
   background-color: #5a5f65;
 }
 
-h2::after {
+.collapse-btn {
+  padding: 5px 0px;
+  padding-right: 12px;
+}
+.collapse-btn::after {
   content: "▼";
   font-size: 12px;
   transition: transform 0.2s ease;
@@ -331,7 +342,7 @@ h2::after {
   flex-shrink: 0;
 }
 
-h2[data-collapsed="true"]::after {
+h2[data-collapsed="true"] > .collapse-btn::after {
   content: "▶";
 }
 
@@ -355,16 +366,37 @@ h2[data-collapsed="true"]::after {
   color: white;
   margin: 0;
 }
-
+.fav-btn {
+  flex: 0 1 auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+  width: auto;
+  min-width: auto;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: 0;
+  font-size: inherit;
+}
+.fav-btn:hover,
 .h2-omit-control:hover {
   opacity: 1;
   transform: scale(1.1);
 }
 
+.fav-btn:active,
 .h2-omit-control:active {
   transform: scale(0.95);
 }
 
+.fav-btn:focus,
 .h2-omit-control:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);

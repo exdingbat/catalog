@@ -146,7 +146,7 @@ export function getAvailableThemes(selectedThemeGroup = null) {
 // Get available subthemes from the data (optionally filtered by theme)
 export function getAvailableSubthemes(
   selectedTheme = null,
-  selectedThemeGroup = null,
+  selectedThemeGroup = null
 ) {
   try {
     if (
@@ -196,7 +196,7 @@ function initializeAutocompleteData() {
 function createAutocompleteSuggestions(
   input,
   suggestions,
-  maxSuggestions = 40,
+  maxSuggestions = 40
 ) {
   const value = input.value.toLowerCase();
 
@@ -298,7 +298,7 @@ export function getOmitList() {
   } catch (error) {
     console.warn(
       "Failed to load omit list from localStorage, using default:",
-      error,
+      error
     );
     return DEFAULT_OMIT_LIST;
   }
@@ -308,6 +308,7 @@ export function getOmitList() {
 export function saveOmitList(omitList) {
   try {
     localStorage.setItem(OMIT_STORAGE_KEY, JSON.stringify(omitList));
+    document.getElementById("searchForm")?.submit();
     return true;
   } catch (error) {
     console.error("Failed to save omit list to localStorage:", error);
@@ -326,7 +327,7 @@ export function addOmitRule(
   themeGroup = "",
   theme = "",
   subtheme = "",
-  name = "",
+  name = ""
 ) {
   const omitList = getOmitList();
   const newRule = [
@@ -338,7 +339,7 @@ export function addOmitRule(
 
   // Check if rule already exists
   const exists = omitList.some(
-    (rule) => JSON.stringify(rule) === JSON.stringify(newRule),
+    (rule) => JSON.stringify(rule) === JSON.stringify(newRule)
   );
 
   if (!exists) {
@@ -365,7 +366,7 @@ export function updateOmitRule(
   themeGroup = "",
   theme = "",
   subtheme = "",
-  name = "",
+  name = ""
 ) {
   const omitList = getOmitList();
   if (index >= 0 && index < omitList.length) {
@@ -475,7 +476,7 @@ function setupInputForm(onAdd) {
     const selectedThemeGroup = themeGroupInput.value.trim();
     const availableSubthemes = getAvailableSubthemes(
       selectedTheme,
-      selectedThemeGroup,
+      selectedThemeGroup
     );
 
     subthemeDatalist.innerHTML = "";

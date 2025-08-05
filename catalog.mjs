@@ -36,7 +36,8 @@ const STATIC_OPTIONS = [
 ];
 
 // IntersectionObserver for lazy rendering
-let intersectionObserver;
+let intersectionObserver_a;
+let intersectionObserver_b;
 
 let searching = false;
 SEARCH_FORM.addEventListener("search", (e) => {
@@ -146,11 +147,11 @@ function createPlaceholder(data) {
 }
 
 // Initialize IntersectionObserver
-function initializeIntersectionObserver() {
-  if (intersectionObserver) {
-    intersectionObserver.disconnect();
+function initializeIntersectionObserver_a() {
+  if (intersectionObserver_a) {
+    intersectionObserver_a.disconnect();
   }
-  intersectionObserver = new IntersectionObserver(
+  intersectionObserver_a = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -168,7 +169,7 @@ function initializeIntersectionObserver() {
               catalogEntry.element = card;
               catalogEntry.placeholder = null;
             }
-            intersectionObserver.unobserve(placeholder);
+            intersectionObserver_a.unobserve(placeholder);
           }
         }
       });
@@ -176,7 +177,29 @@ function initializeIntersectionObserver() {
     {
       rootMargin: "200px",
       threshold: 0.1,
+    }
+  );
+}
+function initializeIntersectionObserver_b() {
+  if (intersectionObserver_b) {
+    intersectionObserver_b.disconnect();
+  }
+  intersectionObserver_b = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(({ isIntersecting, target }) => {
+        if (isIntersecting && target instanceof HTMLDivElement) {
+          if (target.style.visibility !== "visible")
+            target.style.visibility = "visible";
+        } else if (!isIntersecting && target instanceof HTMLDivElement) {
+          if (target.style.visibility !== "hidden")
+            target.style.visibility = "hidden";
+        }
+      });
     },
+    {
+      rootMargin: "600px",
+      threshold: 0,
+    }
   );
 }
 
@@ -191,7 +214,7 @@ const getListItemData = (rows) => {
   }
 
   const result = rows.sort((a, b) =>
-    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year,
+    a.year === b.year ? a.name?.localeCompare(b.name) : b.year - a.year
   );
 
   DATA_CACHE.set(cacheKey, result);
@@ -206,6 +229,7 @@ function makeListItems(items) {
 
   const h2 = document.createElement("h2");
   const button = document.createElement("button");
+  button.classList.add("collapse-btn");
   // Add click handler for collapsible functionality
   button.addEventListener("click", () => {
     const isCollapsed = h2.getAttribute("data-collapsed") === "true";
@@ -222,7 +246,7 @@ function makeListItems(items) {
   // Check if this theme is currently omitted
   const isOmitted = omitList.some(
     (rule) =>
-      (rule[0] === themeGroupName || rule[0] === null) && rule[1] === themeName,
+      (rule[0] === themeGroupName || rule[0] === null) && rule[1] === themeName
   );
 
   // Create omit control button
@@ -241,7 +265,7 @@ function makeListItems(items) {
       const ruleIndex = currentOmitList.findIndex(
         (rule) =>
           (rule[0] === themeGroupName || rule[0] === null) &&
-          rule[1] === themeName,
+          rule[1] === themeName
       );
       if (ruleIndex !== -1) {
         removeOmitRule(ruleIndex);
@@ -275,15 +299,15 @@ function makeListItems(items) {
   const listItems = [];
 
   // Initialize IntersectionObserver if not already done
-  if (!intersectionObserver) {
-    initializeIntersectionObserver();
+  if (!intersectionObserver_a) {
+    initializeIntersectionObserver_a();
   }
 
   // Create placeholders for all data (no pre-filtering)
   listData.forEach((itemData) => {
     const placeholder = createPlaceholder(itemData);
 
-    intersectionObserver.observe(placeholder);
+    intersectionObserver_a.observe(placeholder);
     listItems.push(placeholder);
   });
 
@@ -293,7 +317,11 @@ function makeListItems(items) {
 let i = 0;
 function makeList({ title, listItems }) {
   const list = document.createElement("div");
-  list.classList.add("multicol", "list");
+  if (!intersectionObserver_b) {
+    initializeIntersectionObserver_b();
+  }
+  intersectionObserver_b.observe(list);
+  list.classList.add("multicol", "list", "masonry");
   i++;
 
   // Cache column count calculation
@@ -351,7 +379,7 @@ function updateSearchSuggestions(inputValue = "") {
   }
   if (trimmed.startsWith("subtheme:")) {
     for (const subtheme of new Set(
-      [...THEMES.values()].map((x) => [...x]).flat(),
+      [...THEMES.values()].map((x) => [...x]).flat()
     )) {
       const opt = document.createElement("option");
       opt.value = `subtheme:${subtheme}`;
@@ -388,7 +416,6 @@ SEARCH.addEventListener("input", (e) => {
 
 DIALOG_BUTTON.addEventListener("click", () => {
   DIALOG.close();
-  DIALOG.style.visibility = "hidden";
 });
 
 // Set initial search value if there's an initial query

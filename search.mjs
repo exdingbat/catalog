@@ -1,5 +1,6 @@
 import { replaceState } from "./replaceState.mjs";
 import { CATALOG_DATA } from "./catalogData.mjs";
+import { favCacheRef } from "./catalogCard.mjs";
 import { flatCardData } from "./data.mjs";
 
 // DOM elements
@@ -85,7 +86,7 @@ function evaluateAST(node, catalogEntry) {
         evaluateAST(node.right, catalogEntry)
       );
     case "term":
-      const match = /^([^:]+):(.+)$/.exec(node.value);
+      const match = /^([^:<>]+)[:<>](.+)$/.exec(node.value);
       if (match) {
         const field = match[1]?.toLowerCase();
         let value = match[2]?.toLowerCase();
@@ -95,6 +96,23 @@ function evaluateAST(node, catalogEntry) {
             .replace(/^(no|0)$/i, "false");
           const cardValue = catalogEntry.retired ? "true" : "false";
           return cardValue === value;
+        } else if (field === "fav") {
+          value = value
+            .replace(/^(yes|1)$/i, "true")
+            .replace(/^(no|0)$/i, "false")
+            .toLowerCase();
+          const has = favCacheRef.current.has(catalogEntry.itemnumber);
+          const includeFavs = value === "true";
+          return includeFavs ? has : !has;
+        } else if (field === "year") {
+          value = parseInt(value);
+          if (node.value.includes(">")) {
+            return catalogEntry.year > value;
+          } else if (node.value.includes("<")) {
+            return catalogEntry.year < value;
+          } else {
+            return catalogEntry.year === value;
+          }
         }
         const cardValue = catalogEntry[field];
         return (
@@ -184,7 +202,7 @@ export function performSearch(query) {
 function applySearchResults(currentSearchResults) {
   const resultSetNumbers = new Set(
     // currentSearchResults.map((r) => `${r.Number}-${r.Variant}`),
-    currentSearchResults.map((r) => `${r.itemnumber}`),
+    currentSearchResults.map((r) => `${r.itemnumber}`)
   );
 
   CURRENT_SEARCH_STATE.isActive = true;
@@ -211,7 +229,9 @@ function applySearchResults(currentSearchResults) {
 
 function updateSearchResultsDisplay(query, total) {
   if (query && total > 0) {
-    RESULT_COUNT.textContent = `Found ${total} result${total === 1 ? "" : "s"} for "${query}"`;
+    RESULT_COUNT.textContent = `Found ${total} result${
+      total === 1 ? "" : "s"
+    } for "${query}"`;
     SEARCH_RESULTS.style.display = "flex";
   } else if (query && total === 0) {
     RESULT_COUNT.textContent = `No results found for "${query}"`;
